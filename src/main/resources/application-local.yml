@@ -1,0 +1,12 @@
+server:
+  servlet:
+    context-path: /market/v1
+
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: market_db
+  webservices:
+    path: /market
