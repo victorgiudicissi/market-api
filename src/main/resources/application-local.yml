@@ -1,0 +1,18 @@
+server:
+  servlet:
+    context-path: /market/v1
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_market
+    username: market_user
+    password: market_pwd
+    hikari:
+      maximumPoolSize: 4
+  flyway:
+    url: jdbc:mysql://localhost:3306/db_market
+    username: market_user
+    password: market_pwd
+    validateOnMigrate: true
+  webservices:
+    path: /market
