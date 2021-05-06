@@ -15,14 +15,14 @@ import java.util.UUID;
 public class ItemRequestDto {
     private String description;
     private Long amount;
-    private Long quantityAvailable;
+    private Long quantity;
     private boolean enabled;
 
     public Item toItem() {
         return Item.builder()
                 .uuid(UUID.randomUUID().toString())
                 .description(this.description)
-                .quantityAvailable(this.quantityAvailable)
+                .quantity(this.quantity)
                 .amount(this.amount)
                 .enabled(this.enabled)
                 .build();

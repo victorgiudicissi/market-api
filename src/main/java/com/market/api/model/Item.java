@@ -5,34 +5,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
 
 @Data
-@Entity
 @Builder
+@Document(collection = "item")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Item {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false)
     private String uuid;
-    @Column(nullable = false)
     private String description;
-    @Column(nullable = false)
     private Long amount;
-    @Column(nullable = false)
-    private Long quantityAvailable;
-    @Column(nullable = false)
+    private Long quantity;
     private boolean enabled;
 
     public ItemResponseDto toItemResponseDto() {
         return ItemResponseDto.builder()
                 .uuid(this.uuid)
                 .enabled(this.enabled)
-                .quantityAvailable(this.quantityAvailable)
+                .quantityAvailable(this.quantity)
                 .amount(this.amount)
                 .description(this.description)
                 .build();

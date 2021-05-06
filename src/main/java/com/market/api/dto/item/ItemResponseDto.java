@@ -13,6 +13,6 @@ public class ItemResponseDto {
     private String uuid;
     private String description;
     private Long amount;
-    private Long quantityAvailable;
+    private Long quantity;
     private boolean enabled;
 }

@@ -38,7 +38,7 @@ public class ItemServiceImpl implements ItemService {
 
         log.info("Item encontrado com sucesso, iniciando a deleção. item: {}", item);
 
-        itemRepository.deleteById(item.getId());
+        itemRepository.deleteByUuid(item.getUuid());
     }
 
     @Override

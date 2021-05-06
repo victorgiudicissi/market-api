@@ -5,27 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
-import java.util.List;
 
 @Data
-@Entity
 @Builder
+@Document(collection = "chart")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Chart {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false)
     private String uuid;
-    @Column(nullable = false)
     private Long amountInCents;
-    @Column(nullable = false)
-    @Enumerated(value = EnumType.STRING)
     private Status status;
-
-    @OneToMany(cascade=CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "id")
-    private List<Item> items;
 }
