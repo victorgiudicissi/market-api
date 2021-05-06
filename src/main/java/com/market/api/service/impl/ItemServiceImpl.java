@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,6 +25,39 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemResponseDto save(ItemRequestDto itemRequestDto) {
         return itemRepository.save(itemRequestDto.toItem())
+                .toItemResponseDto();
+    }
+
+    @Override
+    public ItemResponseDto updateItem(String itemUuid, ItemRequestDto itemRequestDto) {
+        Item item = itemRepository.findByUuid(itemUuid);
+
+        if (Objects.isNull(item)) {
+            log.warn("Não foi possível encontrar o item passado. itemUuid: {}", itemUuid);
+            throw new DataNotFoundException("Não foi possível encontrar o item informado.");
+        }
+
+        return itemRepository.save(itemRequestDto.toItem(itemUuid, item.getCreatedAt()))
+                .toItemResponseDto();
+    }
+
+    @Override
+    public List<Item> saveAll(Set<Item> items) {
+        return itemRepository.saveAll(items);
+    }
+
+    @Override
+    public ItemResponseDto changeItemStatus(String itemUuid, boolean status) {
+        Item item = itemRepository.findByUuid(itemUuid);
+
+        if (Objects.isNull(item)) {
+            log.warn("Não foi possível encontrar o item passado. itemUuid: {}", itemUuid);
+            throw new DataNotFoundException("Não foi possível encontrar o item informado.");
+        }
+
+        item.setEnabled(status);
+
+        return itemRepository.save(item)
                 .toItemResponseDto();
     }
 
@@ -42,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemResponseDto findItem(String itemUuid) {
+    public ItemResponseDto findItemByUuid(String itemUuid) {
         Item item = itemRepository.findByUuid(itemUuid);
 
         if (Objects.isNull(item)) {

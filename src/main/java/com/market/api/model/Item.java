@@ -1,16 +1,15 @@
 package com.market.api.model;
 
 import com.market.api.dto.item.ItemResponseDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @Document(collection = "item")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,14 +20,18 @@ public class Item {
     private Long amount;
     private Long quantity;
     private boolean enabled;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public ItemResponseDto toItemResponseDto() {
         return ItemResponseDto.builder()
                 .uuid(this.uuid)
                 .enabled(this.enabled)
-                .quantityAvailable(this.quantity)
+                .quantity(this.quantity)
                 .amount(this.amount)
                 .description(this.description)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
                 .build();
     }
 }

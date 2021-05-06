@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -25,6 +26,20 @@ public class ItemRequestDto {
                 .quantity(this.quantity)
                 .amount(this.amount)
                 .enabled(this.enabled)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public Item toItem(String uuid, LocalDateTime createdAt) {
+        return Item.builder()
+                .uuid(uuid)
+                .description(this.description)
+                .quantity(this.quantity)
+                .amount(this.amount)
+                .enabled(this.enabled)
+                .createdAt(createdAt)
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 }

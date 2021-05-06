@@ -2,6 +2,7 @@ package com.market.api.controller;
 
 import com.market.api.dto.item.ItemRequestDto;
 import com.market.api.dto.item.ItemResponseDto;
+import com.market.api.model.Item;
 import com.market.api.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,12 @@ public class ItemController {
         return ResponseEntity.status(HttpStatus.CREATED).body(itemService.save(itemRequestDto));
     }
 
+    @PutMapping(value = "/{itemUuid}")
+    public ResponseEntity<ItemResponseDto> updateItem(@RequestBody ItemRequestDto itemRequestDto,
+                                                      @PathVariable("itemUuid") String uuid) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.updateItem(uuid, itemRequestDto));
+    }
+
     @DeleteMapping(value = "/{itemUuid}")
     public ResponseEntity<Void> deleteItem(@PathVariable("itemUuid") String uuid) {
         itemService.delete(uuid);
@@ -29,7 +36,7 @@ public class ItemController {
 
     @GetMapping(value = "/{itemUuid}")
     public ResponseEntity<ItemResponseDto> findItem(@PathVariable("itemUuid") String uuid) {
-        return ResponseEntity.ok(itemService.findItem(uuid));
+        return ResponseEntity.ok(itemService.findItemByUuid(uuid));
     }
 
     @GetMapping
@@ -38,7 +45,8 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemUuid}/status/{isEnabled}")
-    public ResponseEntity<ItemResponseDto> enableOrDisableItem(@RequestBody ItemRequestDto itemRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.save(itemRequestDto));
+    public ResponseEntity<ItemResponseDto> enableOrDisableItem(@PathVariable("itemUuid") String itemUuid,
+                                                               @PathVariable("isEnabled") boolean isEnabled) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.changeItemStatus(itemUuid, isEnabled));
     }
 }
