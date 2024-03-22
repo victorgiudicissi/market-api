@@ -1,11 +1,13 @@
 package com.market.api.dto.chart;
 
-import com.market.api.dto.item.ItemResponseDto;
+import com.market.api.dto.item.ChartItemRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -13,5 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChartRequestDto {
-    List<ItemResponseDto> items;
+    @Valid
+    @NotNull(message = "Chart items may not be null")
+    List<ChartItemRequestDto> items;
 }

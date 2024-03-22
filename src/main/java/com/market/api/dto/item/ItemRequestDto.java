@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,10 +16,16 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemRequestDto {
+
+    @NotNull(message = "Description may not be null")
     private String description;
+    @Positive(message = "Must be greater than 0")
+    @NotNull(message = "Price may not be null")
     private Long price;
+    @Positive(message = "Must be greater than 0")
+    @NotNull(message = "Quantity may not be null")
     private Long quantity;
-    private boolean enabled;
+    private boolean enabled = true;
 
     public Item toItem() {
         return Item.builder()

@@ -7,6 +7,7 @@ import com.market.api.exception.UnavailableProductException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -35,5 +36,12 @@ public class AdvisorController {
     @ExceptionHandler(UnavailableProductException.class)
     public ExceptionResponseDto unavailableProductExceptionHandler(UnavailableProductException ex) {
         return new ExceptionResponseDto(ex.getClass().getSimpleName(), ex.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ExceptionResponseDto methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException ex) {
+        return new ExceptionResponseDto(ex.getClass().getSimpleName(), ex.getFieldError().getDefaultMessage());
     }
 }
