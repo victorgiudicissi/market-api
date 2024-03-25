@@ -1,0 +1,349 @@
+{
+	"info": {
+		"_postman_id": "ed4c2f09-1120-429a-a201-1729541b5b40",
+		"name": "Market",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22135682",
+		"_collection_link": "https://galactic-capsule-344988.postman.co/workspace/Personal~22e99945-fb8d-4eb8-9ecb-082c69fbc21f/collection/22135682-ed4c2f09-1120-429a-a201-1729541b5b40?action=share&source=collection_link&creator=22135682"
+	},
+	"item": [
+		{
+			"name": "Item",
+			"item": [
+				{
+					"name": "Create Item",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Pão Frances\",\n    \"marketUuid\": \"6572dabf-e7c6-444a-b02f-c1f814b90742\",\n    \"price\": 250,\n    \"quantity\": 1350,\n    \"enabled\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/item",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"item"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Item Copy",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Maçã Verde\",\n    \"price\": 120,\n    \"quantity\": 1000,\n    \"enabled\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/item/fcd17668-50ae-4044-95a4-ed04ae490d87",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"item",
+								"fcd17668-50ae-4044-95a4-ed04ae490d87"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Item by UUID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Maçã\",\n    \"amount\": 100,\n    \"quantity\": 1000,\n    \"enabled\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/item/405b0d01-f3b3-4b67-81f4-eed04e767c48",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"item",
+								"405b0d01-f3b3-4b67-81f4-eed04e767c48"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Itens",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/item?page=1&size=1&description=Banana&enabled=true",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"item"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "1"
+								},
+								{
+									"key": "description",
+									"value": "Banana"
+								},
+								{
+									"key": "marketUuid",
+									"value": "6572dabf-e7c6-444a-b02f-c1f814b90742",
+									"disabled": true
+								},
+								{
+									"key": "enabled",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Maçã\",\n    \"amount\": 100,\n    \"quantity\": 1000,\n    \"enabled\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/item/0542e5fb-b643-4a0c-8112-bd56fd41bdab",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"item",
+								"0542e5fb-b643-4a0c-8112-bd56fd41bdab"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch item status",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Maçã\",\n    \"amount\": 100,\n    \"quantity\": 1000,\n    \"enabled\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/item/0542e5fb-b643-4a0c-8112-bd56fd41bdab/status/true",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"item",
+								"0542e5fb-b643-4a0c-8112-bd56fd41bdab",
+								"status",
+								"true"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chart",
+			"item": [
+				{
+					"name": "Create chart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"items\": [\n        {\n            \"uuid\": \"405b0d01-f3b3-4b67-81f4-eed04e767c48\",\n            \"quantity\": 10\n        }\n    ],\n    \"marketUuid\": \"6572dabf-e7c6-444a-b02f-c1f814b9073d\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/chart",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"chart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get By uuid",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"items\": [\n        {\n            \"uuid\": \"96aae9f1-fb3b-4731-b332-091a753eb858\",\n            \"quantity\": 10\n        },\n        {\n            \"uuid\": \"087e6b97-d87c-4723-a50f-81e2e48ca14c\",\n            \"quantity\": 10\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/chart/0e27cf11-86cb-4d2d-b5b5-e3ed6620c622",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"chart",
+								"0e27cf11-86cb-4d2d-b5b5-e3ed6620c622"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete By uuid",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"items\": [\n        {\n            \"uuid\": \"96aae9f1-fb3b-4731-b332-091a753eb858\",\n            \"quantity\": 10\n        },\n        {\n            \"uuid\": \"087e6b97-d87c-4723-a50f-81e2e48ca14c\",\n            \"quantity\": 10\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/chart/0e27cf11-86cb-4d2d-b5b5-e3ed6620c622",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"chart",
+								"0e27cf11-86cb-4d2d-b5b5-e3ed6620c622"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Charts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/chart?page=1&size=10&status=PAYED",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"chart"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "marketUuid",
+									"value": "6572dabf-e7c6-444a-b02f-c1f814b90742",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "PAYED"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"items\": [\n        {\n            \"uuid\": \"96aae9f1-fb3b-4731-b332-091a753eb858\",\n            \"quantity\": 10\n        },\n        {\n            \"uuid\": \"087e6b97-d87c-4723-a50f-81e2e48ca14c\",\n            \"quantity\": 10\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/chart/0e27cf11-86cb-4d2d-b5b5-e3ed6620c622",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"chart",
+								"0e27cf11-86cb-4d2d-b5b5-e3ed6620c622"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
