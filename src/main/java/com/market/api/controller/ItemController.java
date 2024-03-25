@@ -1,8 +1,9 @@
 package com.market.api.controller;
 
+import com.market.api.dto.Page;
+import com.market.api.dto.item.FilterItemRequestDto;
 import com.market.api.dto.item.ItemRequestDto;
 import com.market.api.dto.item.ItemResponseDto;
-import com.market.api.model.Item;
 import com.market.api.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/item")
@@ -41,8 +41,8 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseDto>> findItems() {
-        return ResponseEntity.ok(itemService.findItems());
+    public ResponseEntity<Page<ItemResponseDto>> findItems(@Valid FilterItemRequestDto filter) {
+        return ResponseEntity.ok(itemService.findItemsByFilter(filter));
     }
 
     @PatchMapping("/{itemUuid}/status/{isEnabled}")

@@ -18,4 +18,6 @@ public class ChartRequestDto {
     @Valid
     @NotNull(message = "Chart items may not be null")
     List<ChartItemRequestDto> items;
+    @NotNull(message = "Market uuid may not be null")
+    String marketUuid;
 }

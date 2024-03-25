@@ -1,5 +1,7 @@
 package com.market.api.service;
 
+import com.market.api.dto.Page;
+import com.market.api.dto.item.FilterItemRequestDto;
 import com.market.api.dto.item.ItemRequestDto;
 import com.market.api.dto.item.ItemResponseDto;
 import com.market.api.model.Item;
@@ -12,7 +14,7 @@ public interface ItemService {
     ItemResponseDto updateItem(String itemUuid, ItemRequestDto itemRequestDto);
     void delete(String itemUuid);
     ItemResponseDto findItemByUuid(String itemUuid);
-    List<ItemResponseDto> findItems();
+    Page<ItemResponseDto> findItemsByFilter(FilterItemRequestDto filter);
     List<Item> saveAll(Set<Item> items);
     ItemResponseDto changeItemStatus(String itemUuid, boolean status);
 }

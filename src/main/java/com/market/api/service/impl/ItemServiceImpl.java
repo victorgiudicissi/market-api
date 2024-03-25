@@ -1,5 +1,7 @@
 package com.market.api.service.impl;
 
+import com.market.api.dto.Page;
+import com.market.api.dto.item.FilterItemRequestDto;
 import com.market.api.dto.item.ItemRequestDto;
 import com.market.api.dto.item.ItemResponseDto;
 import com.market.api.exception.DataNotFoundException;
@@ -8,10 +10,15 @@ import com.market.api.repository.ItemRepository;
 import com.market.api.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +28,7 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public ItemResponseDto save(ItemRequestDto itemRequestDto) {
@@ -30,12 +38,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseDto updateItem(String itemUuid, ItemRequestDto itemRequestDto) {
-        Item item = itemRepository.findByUuid(itemUuid);
-
-        if (Objects.isNull(item)) {
-            log.warn("Não foi possível encontrar o item passado. itemUuid: {}", itemUuid);
-            throw new DataNotFoundException("Não foi possível encontrar o item informado.");
-        }
+        Item item = this.findItem(itemUuid);
 
         return itemRepository.save(itemRequestDto.toItem(itemUuid, item.getCreatedAt()))
                 .toItemResponseDto();
@@ -48,12 +51,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseDto changeItemStatus(String itemUuid, boolean status) {
-        Item item = itemRepository.findByUuid(itemUuid);
-
-        if (Objects.isNull(item)) {
-            log.warn("Não foi possível encontrar o item passado. itemUuid: {}", itemUuid);
-            throw new DataNotFoundException("Não foi possível encontrar o item informado.");
-        }
+        Item item = this.findItem(itemUuid);
 
         item.setEnabled(status);
 
@@ -63,12 +61,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void delete(String itemUuid) {
-        Item item = itemRepository.findByUuid(itemUuid);
-
-        if (Objects.isNull(item)) {
-            log.warn("Não foi possível encontrar o item passado. itemUuid: {}", itemUuid);
-            throw new DataNotFoundException("Não foi possível encontrar o item informado.");
-        }
+        Item item = this.findItem(itemUuid);
 
         log.info("Item encontrado com sucesso, iniciando a deleção. item: {}", item);
 
@@ -77,29 +70,55 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseDto findItemByUuid(String itemUuid) {
-        Item item = itemRepository.findByUuid(itemUuid);
-
-        if (Objects.isNull(item)) {
-            log.warn("Não foi possível encontrar o item passado. itemUuid: {}", itemUuid);
-            throw new DataNotFoundException("Não foi possível encontrar o item informado.");
-        }
+        Item item = this.findItem(itemUuid);
 
         log.info("Item encontrado com sucesso. item: {}", item);
         return item.toItemResponseDto();
     }
 
     @Override
-    public List<ItemResponseDto> findItems() {
-        List<Item> items = itemRepository.findAll();
+    public Page<ItemResponseDto> findItemsByFilter(FilterItemRequestDto filter) {
+        log.info("Filtering items. filter: {}", filter);
+        PageRequest pageRequest = PageRequest.of(filter.getPage() - 1, filter.getSize());
 
-        if (items.isEmpty()) {
-            log.warn("Não foi possível encontrar nenhum item na base.");
-            throw new DataNotFoundException("Não foi possível encontrar nenhum item na base.");
+        Query query = new Query();
+
+        if (filter.getEnabled() != null) {
+            query.addCriteria(Criteria.where("enabled").is(filter.getEnabled()));
+        } else if (filter.getDescription() != null) {
+            query.addCriteria(Criteria.where("description").regex(filter.getDescription(), "i"));
+        } else if (filter.getMarketUuid() != null) {
+            query.addCriteria(Criteria.where("marketUuid").regex(filter.getMarketUuid(), "i"));
         }
 
-        log.info("Itens encontrados com sucesso. itens: {}", items);
-        return items.stream()
+        long totalCount = mongoTemplate.count(query, Item.class);
+
+        query.with(pageRequest);
+
+        List<Item> items = mongoTemplate.find(query, Item.class);
+
+        List<ItemResponseDto> itemsDTO = items.stream()
                 .map(Item::toItemResponseDto)
                 .collect(Collectors.toList());
+
+        Page<ItemResponseDto> pagination = new Page<>();
+        pagination.setPage(filter.getPage());
+        pagination.setCount(totalCount);
+        pagination.setSize(filter.getSize());
+        pagination.setContent(itemsDTO);
+
+        return pagination;
+    }
+
+    private Item findItem(String itemUuid) {
+        Optional<Item> optItem = itemRepository.findById(itemUuid);
+
+        if (optItem.isEmpty()) {
+            String message = "It was not possible find the item with uuid %s.";
+            log.warn(String.format(message, itemUuid));
+            throw new DataNotFoundException(String.format(message, itemUuid));
+        }
+
+        return optItem.get();
     }
 }

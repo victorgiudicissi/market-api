@@ -17,6 +17,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ItemRequestDto {
 
+    @NotNull(message = "Market uuid may not be null")
+    private String marketUuid;
     @NotNull(message = "Description may not be null")
     private String description;
     @Positive(message = "Must be greater than 0")
@@ -30,6 +32,7 @@ public class ItemRequestDto {
     public Item toItem() {
         return Item.builder()
                 .uuid(UUID.randomUUID().toString())
+                .marketUuid(this.marketUuid)
                 .description(this.description)
                 .quantity(this.quantity)
                 .price(this.price)
@@ -42,6 +45,7 @@ public class ItemRequestDto {
     public Item toItem(String uuid, LocalDateTime createdAt) {
         return Item.builder()
                 .uuid(uuid)
+                .marketUuid(this.marketUuid)
                 .description(this.description)
                 .quantity(this.quantity)
                 .price(this.price)

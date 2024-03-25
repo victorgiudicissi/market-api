@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class Chart {
     @Id
     private String uuid;
+    private String marketUuid;
     private Status status;
     private Long price;
     private Set<Item> items;
@@ -30,6 +31,7 @@ public class Chart {
     public ChartResponseDto toChartResponseDto() {
         return ChartResponseDto.builder()
                 .uuid(this.uuid)
+                .marketUuid(this.marketUuid)
                 .price(this.price)
                 .status(this.status)
                 .items(this.items.stream().map(item -> item.toItemResponseDto()).collect(Collectors.toList()))

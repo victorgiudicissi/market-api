@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 public class Item {
     @Id
     private String uuid;
+    private String marketUuid;
     private String description;
     private Long price;
     private Long quantity;
@@ -26,6 +28,7 @@ public class Item {
     public ItemResponseDto toItemResponseDto() {
         return ItemResponseDto.builder()
                 .uuid(this.uuid)
+                .marketUuid(this.marketUuid)
                 .enabled(this.enabled)
                 .quantity(this.quantity)
                 .price(this.price)

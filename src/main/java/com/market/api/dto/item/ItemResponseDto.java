@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ItemResponseDto {
     private String uuid;
+    private String marketUuid;
     private String description;
     private Long price;
     private Long quantity;
@@ -24,6 +26,7 @@ public class ItemResponseDto {
     public Item toItem() {
         return Item.builder()
                 .uuid(this.uuid)
+                .marketUuid(this.marketUuid)
                 .enabled(this.enabled)
                 .quantity(this.quantity)
                 .price(this.price)

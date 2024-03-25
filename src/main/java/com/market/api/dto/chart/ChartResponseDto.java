@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ChartResponseDto {
     private String uuid;
+    private String marketUuid;
     private Long price;
     private Status status;
     private List<ItemResponseDto> items;
