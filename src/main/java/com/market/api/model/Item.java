@@ -19,6 +19,7 @@ public class Item {
     private String uuid;
     private String marketUuid;
     private String description;
+    private String section;
     private Long price;
     private Long quantity;
     private boolean enabled;
@@ -32,6 +33,7 @@ public class Item {
                 .enabled(this.enabled)
                 .quantity(this.quantity)
                 .price(this.price)
+                .section(this.section)
                 .description(this.description)
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)

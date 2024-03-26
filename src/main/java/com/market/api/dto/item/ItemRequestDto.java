@@ -21,6 +21,8 @@ public class ItemRequestDto {
     private String marketUuid;
     @NotNull(message = "Description may not be null")
     private String description;
+    @NotNull(message = "Section may not be null")
+    private String section;
     @Positive(message = "Must be greater than 0")
     @NotNull(message = "Price may not be null")
     private Long price;
@@ -35,6 +37,7 @@ public class ItemRequestDto {
                 .marketUuid(this.marketUuid)
                 .description(this.description)
                 .quantity(this.quantity)
+                .section(this.section)
                 .price(this.price)
                 .enabled(this.enabled)
                 .createdAt(LocalDateTime.now())
@@ -48,6 +51,7 @@ public class ItemRequestDto {
                 .marketUuid(this.marketUuid)
                 .description(this.description)
                 .quantity(this.quantity)
+                .section(this.section)
                 .price(this.price)
                 .enabled(this.enabled)
                 .createdAt(createdAt)

@@ -17,6 +17,7 @@ public class ItemResponseDto {
     private String uuid;
     private String marketUuid;
     private String description;
+    private String section;
     private Long price;
     private Long quantity;
     private boolean enabled;
@@ -29,6 +30,7 @@ public class ItemResponseDto {
                 .marketUuid(this.marketUuid)
                 .enabled(this.enabled)
                 .quantity(this.quantity)
+                .section(this.section)
                 .price(this.price)
                 .description(this.description)
                 .createdAt(this.createdAt)
