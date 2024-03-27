@@ -33,7 +33,7 @@ After setting up DB, we can execute the API running the following command:
 
 You can see API configuration going to:
 
-`http://localhost:8080/swagger-ui/index.html#/item-controller`
+`http://localhost:8080/swagger-ui/index.html`
 
 ## Tests
 
@@ -44,3 +44,9 @@ To run unit tests, you can execute the following command:
 To generate coverage reports:
 
 `./gradlew test jacocoTestReport `
+
+## Docker-compose
+
+Use docker-compose to simplify the setup of your development environment:
+
+`docker-compose up`
