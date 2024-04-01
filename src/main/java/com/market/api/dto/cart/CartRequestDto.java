@@ -1,6 +1,6 @@
-package com.market.api.dto.chart;
+package com.market.api.dto.cart;
 
-import com.market.api.dto.item.ChartItemRequestDto;
+import com.market.api.dto.item.CartItemRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,10 +14,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChartRequestDto {
+public class CartRequestDto {
     @Valid
-    @NotNull(message = "Chart items may not be null")
-    List<ChartItemRequestDto> items;
+    @NotNull(message = "Cart items may not be null")
+    List<CartItemRequestDto> items;
     @NotNull(message = "Market uuid may not be null")
     String marketUuid;
 }

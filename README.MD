@@ -8,11 +8,12 @@ This application in focused in simulate a market, covering the following context
 
 - Items
 - Market Data
-- Chart
+- Cart
 
 ## Prerequisites
 
 - [Jabba](https://github.com/shyiko/jabba) (Optional) - It's a Java Version Manager
+- [Conduktor](https://www.conduktor.io/get-started/) (Optional)
 - Java 11
 - [Docker](https://docs.docker.com/get-started/overview/)
 - [MongoDB](https://www.mongodb.com/docs/manual/)

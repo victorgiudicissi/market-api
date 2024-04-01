@@ -12,7 +12,7 @@ import javax.validation.constraints.Positive;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChartItemRequestDto {
+public class CartItemRequestDto {
     @NotNull(message = "Uuid may not be null")
     private String uuid;
     @Positive(message = "Must be greater than 0")

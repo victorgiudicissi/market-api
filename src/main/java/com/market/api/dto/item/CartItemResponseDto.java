@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChartItemResponseDto {
+public class CartItemResponseDto {
     private String uuid;
     private String description;
     private Long price;

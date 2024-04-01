@@ -1,6 +1,9 @@
 package com.market.api.service.impl;
 
 import com.market.api.dto.Page;
+import com.market.api.dto.event.Event;
+import com.market.api.dto.event.EventAction;
+import com.market.api.dto.event.EventType;
 import com.market.api.dto.item.FilterItemRequestDto;
 import com.market.api.dto.item.ItemRequestDto;
 import com.market.api.dto.item.ItemResponseDto;
@@ -16,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,19 +32,41 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final MongoTemplate mongoTemplate;
+    private final KafkaServiceImpl kafkaService;
 
     @Override
     public ItemResponseDto save(ItemRequestDto itemRequestDto) {
-        return itemRepository.save(itemRequestDto.toItem())
+        ItemResponseDto result = itemRepository.save(itemRequestDto.toItem())
                 .toItemResponseDto();
+
+        kafkaService.sendEvent(Event
+                        .builder()
+                        .content(result)
+                        .action(com.market.api.dto.event.EventAction.SAVE)
+                        .type(EventType.ITEM)
+                        .createdAt(LocalDateTime.now())
+                        .build(),
+                EventType.ITEM);
+
+        return result;
     }
 
     @Override
     public ItemResponseDto updateItem(String itemUuid, ItemRequestDto itemRequestDto) {
         Item item = this.findItem(itemUuid);
 
-        return itemRepository.save(itemRequestDto.toItem(itemUuid, item.getCreatedAt()))
+        ItemResponseDto result = itemRepository.save(itemRequestDto.toItem(itemUuid, item.getCreatedAt()))
                 .toItemResponseDto();
+
+        kafkaService.sendEvent(Event
+                .builder()
+                .content(result)
+                .action(EventAction.UPDATE)
+                .type(EventType.ITEM)
+                .createdAt(LocalDateTime.now())
+                .build(), EventType.ITEM);
+
+        return result;
     }
 
     @Override
@@ -54,8 +80,18 @@ public class ItemServiceImpl implements ItemService {
 
         item.setEnabled(status);
 
-        return itemRepository.save(item)
+        ItemResponseDto result = itemRepository.save(item)
                 .toItemResponseDto();
+
+        kafkaService.sendEvent(Event
+                .builder()
+                .content(result)
+                .action(EventAction.UPDATE_STATUS)
+                .type(EventType.ITEM)
+                .createdAt(LocalDateTime.now())
+                .build(), EventType.ITEM);
+
+        return result;
     }
 
     @Override
@@ -63,6 +99,14 @@ public class ItemServiceImpl implements ItemService {
         Item item = this.findItem(itemUuid);
 
         log.info("Item encontrado com sucesso, iniciando a deleção. item: {}", item);
+
+        kafkaService.sendEvent(Event
+                .builder()
+                .content(item.toItemResponseDto())
+                .action(EventAction.DELETE)
+                .type(EventType.ITEM)
+                .createdAt(LocalDateTime.now())
+                .build(), EventType.ITEM);
 
         itemRepository.deleteByUuid(item.getUuid());
     }

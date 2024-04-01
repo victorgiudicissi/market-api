@@ -12,7 +12,7 @@ import javax.validation.constraints.Min;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FilterChartRequestDto {
+public class FilterCartRequestDto {
     private String marketUuid;
     private Status status;
     @Min(value = 1, message = "Minimum value for page is 1.")

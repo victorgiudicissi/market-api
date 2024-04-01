@@ -192,16 +192,16 @@
 			]
 		},
 		{
-			"name": "Chart",
+			"name": "Cart",
 			"item": [
 				{
-					"name": "Create chart",
+					"name": "Create cart",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"items\": [\n        {\n            \"uuid\": \"405b0d01-f3b3-4b67-81f4-eed04e767c48\",\n            \"quantity\": 10\n        }\n    ],\n    \"marketUuid\": \"6572dabf-e7c6-444a-b02f-c1f814b9073d\"\n}",
+							"raw": "{\n    \"items\": [\n        {\n            \"uuid\": \"76bacfc9-e615-49c7-9b7d-5a49854b5e20\",\n            \"quantity\": 10\n        }\n    ],\n    \"marketUuid\": \"6572dabf-e7c6-444a-b02f-c1f814b9073d\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -209,12 +209,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/chart",
+							"raw": "{{host}}/cart",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"chart"
+								"cart"
 							]
 						}
 					},
@@ -238,13 +238,42 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/chart/0e27cf11-86cb-4d2d-b5b5-e3ed6620c622",
+							"raw": "{{host}}/cart/0e27cf11-86cb-4d2d-b5b5-e3ed6620c622",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"chart",
+								"cart",
 								"0e27cf11-86cb-4d2d-b5b5-e3ed6620c622"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"items\": [\n        {\n            \"uuid\": \"96aae9f1-fb3b-4731-b332-091a753eb858\",\n            \"quantity\": 10\n        },\n        {\n            \"uuid\": \"087e6b97-d87c-4723-a50f-81e2e48ca14c\",\n            \"quantity\": 10\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/cart/c9135726-dd7c-44db-8ce6-4f5dc2c92e7c/status/PAYED",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"cart",
+								"c9135726-dd7c-44db-8ce6-4f5dc2c92e7c",
+								"status",
+								"PAYED"
 							]
 						}
 					},
@@ -265,30 +294,30 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/chart/0e27cf11-86cb-4d2d-b5b5-e3ed6620c622",
+							"raw": "{{host}}/cart/c9135726-dd7c-44db-8ce6-4f5dc2c92e7c",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"chart",
-								"0e27cf11-86cb-4d2d-b5b5-e3ed6620c622"
+								"cart",
+								"c9135726-dd7c-44db-8ce6-4f5dc2c92e7c"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Get Charts",
+					"name": "Get Carts",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/chart?page=1&size=10&status=PAYED",
+							"raw": "{{host}}/cart?page=1&size=10&status=PAYED",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"chart"
+								"cart"
 							],
 							"query": [
 								{
@@ -308,36 +337,6 @@
 									"key": "status",
 									"value": "PAYED"
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Status",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"items\": [\n        {\n            \"uuid\": \"96aae9f1-fb3b-4731-b332-091a753eb858\",\n            \"quantity\": 10\n        },\n        {\n            \"uuid\": \"087e6b97-d87c-4723-a50f-81e2e48ca14c\",\n            \"quantity\": 10\n        }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/chart/0e27cf11-86cb-4d2d-b5b5-e3ed6620c622",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"chart",
-								"0e27cf11-86cb-4d2d-b5b5-e3ed6620c622"
 							]
 						}
 					},

@@ -1,6 +1,6 @@
 package com.market.api.model;
 
-import com.market.api.dto.chart.ChartResponseDto;
+import com.market.api.dto.cart.CartResponseDto;
 import com.market.api.model.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 
 @Data
 @Builder
-@Document(collection = "chart")
+@Document(collection = "cart")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Chart {
+public class Cart {
     @Id
     private String uuid;
     private String marketUuid;
@@ -28,8 +28,8 @@ public class Chart {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ChartResponseDto toChartResponseDto() {
-        return ChartResponseDto.builder()
+    public CartResponseDto toCartResponseDto() {
+        return CartResponseDto.builder()
                 .uuid(this.uuid)
                 .marketUuid(this.marketUuid)
                 .price(this.price)

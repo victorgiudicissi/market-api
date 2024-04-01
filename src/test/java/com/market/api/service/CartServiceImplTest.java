@@ -1,19 +1,20 @@
 package com.market.api.service;
 
 import com.market.api.dto.Page;
-import com.market.api.dto.chart.ChartRequestDto;
-import com.market.api.dto.chart.ChartResponseDto;
-import com.market.api.dto.item.ChartItemRequestDto;
-import com.market.api.dto.item.FilterChartRequestDto;
+import com.market.api.dto.cart.CartRequestDto;
+import com.market.api.dto.cart.CartResponseDto;
+import com.market.api.dto.item.CartItemRequestDto;
+import com.market.api.dto.item.FilterCartRequestDto;
 import com.market.api.dto.item.ItemResponseDto;
 import com.market.api.exception.DataNotFoundException;
 import com.market.api.exception.OutOfStockException;
 import com.market.api.exception.UnavailableProductException;
-import com.market.api.model.Chart;
+import com.market.api.model.Cart;
 import com.market.api.model.Item;
 import com.market.api.model.enums.Status;
-import com.market.api.repository.ChartRepository;
-import com.market.api.service.impl.ChartServiceImpl;
+import com.market.api.repository.CartRepository;
+import com.market.api.service.impl.CartServiceImpl;
+import com.market.api.service.impl.KafkaServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -30,19 +31,22 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class ChartServiceImplTest {
+class CartServiceImplTest {
 
     @Mock
     private ItemService itemService;
 
     @Mock
-    private ChartRepository chartRepository;
+    private CartRepository cartRepository;
 
     @Mock
     private MongoTemplate mongoTemplate;
 
+    @Mock
+    private KafkaServiceImpl kafkaService;
+
     @InjectMocks
-    private ChartServiceImpl chartService;
+    private CartServiceImpl cartService;
 
     @BeforeEach
     void setUp() {
@@ -50,12 +54,12 @@ class ChartServiceImplTest {
     }
 
     @Test
-    void createChart_WhenItemsAreAvailableAndInStock_ShouldReturnChartResponseDto() {
+    void createCart_WhenItemsAreAvailableAndInStock_ShouldReturnCartResponseDto() {
         // GIVEN
-        ChartRequestDto chartRequestDto = ChartRequestDto
+        CartRequestDto cartRequestDto = CartRequestDto
                 .builder()
                 .marketUuid("mock-market-uuid")
-                .items(List.of(ChartItemRequestDto.builder()
+                .items(List.of(CartItemRequestDto.builder()
                         .uuid("first-item-uuid")
                         .quantity(10L)
                         .build())
@@ -67,10 +71,11 @@ class ChartServiceImplTest {
                         .quantity(100L)
                         .enabled(true)
                 .build());
-        when(chartRepository.save(any())).thenReturn(mock(Chart.class));
+        when(cartRepository.save(any())).thenReturn(mock(Cart.class));
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
-        ChartResponseDto result = chartService.createChart(chartRequestDto);
+        CartResponseDto result = cartService.createCart(cartRequestDto);
 
         // THEN
         assertNotNull(result);
@@ -80,12 +85,12 @@ class ChartServiceImplTest {
     }
 
     @Test
-    void createChart_WhenItemsAreNotInStock_ShouldThrowOutOfStockException() {
+    void createCart_WhenItemsAreNotInStock_ShouldThrowOutOfStockException() {
         // GIVEN
-        ChartRequestDto chartRequestDto = ChartRequestDto
+        CartRequestDto cartRequestDto = CartRequestDto
                 .builder()
                 .marketUuid("mock-market-uuid")
-                .items(List.of(ChartItemRequestDto.builder()
+                .items(List.of(CartItemRequestDto.builder()
                         .uuid("first-item-uuid")
                         .quantity(11L)
                         .build())
@@ -97,22 +102,23 @@ class ChartServiceImplTest {
                 .quantity(10L)
                 .enabled(true)
                 .build());
-        when(chartRepository.save(any())).thenReturn(mock(Chart.class));
+        when(cartRepository.save(any())).thenReturn(mock(Cart.class));
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
 
         // WHEN - THEN
-        assertThrows(OutOfStockException.class, () -> chartService.createChart(chartRequestDto));
+        assertThrows(OutOfStockException.class, () -> cartService.createCart(cartRequestDto));
         verify(itemService, times(1)).findItemByUuid("first-item-uuid");
-        verify(chartRepository, times(0)).save(any());
+        verify(cartRepository, times(0)).save(any());
     }
 
     @Test
-    void createChart_WhenItemsAreDisabled_ShouldThrowUnavailableProductException() {
+    void createCart_WhenItemsAreDisabled_ShouldThrowUnavailableProductException() {
         // GIVEN
-        ChartRequestDto chartRequestDto = ChartRequestDto
+        CartRequestDto cartRequestDto = CartRequestDto
                 .builder()
                 .marketUuid("mock-market-uuid")
-                .items(List.of(ChartItemRequestDto.builder()
+                .items(List.of(CartItemRequestDto.builder()
                         .uuid("first-item-uuid")
                         .quantity(10L)
                         .build())
@@ -124,19 +130,20 @@ class ChartServiceImplTest {
                 .quantity(10L)
                 .enabled(false)
                 .build());
-        when(chartRepository.save(any())).thenReturn(mock(Chart.class));
+        when(cartRepository.save(any())).thenReturn(mock(Cart.class));
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
 
         // WHEN - THEN
-        assertThrows(UnavailableProductException.class, () -> chartService.createChart(chartRequestDto));
+        assertThrows(UnavailableProductException.class, () -> cartService.createCart(cartRequestDto));
         verify(itemService, times(1)).findItemByUuid("first-item-uuid");
-        verify(chartRepository, times(0)).save(any());
+        verify(cartRepository, times(0)).save(any());
     }
 
     @Test
     void getByUuid_WhenItemIsFound_ShouldReturnItem() {
         // GIVEN
-        Chart chart = Chart
+        Cart cart = Cart
                 .builder()
                 .marketUuid("mock-market-uuid")
                 .items(Set.of(Item.builder()
@@ -147,10 +154,10 @@ class ChartServiceImplTest {
                 .price(100L)
                 .build();
 
-        when(chartRepository.findById(anyString())).thenReturn(ofNullable(chart));
+        when(cartRepository.findById(anyString())).thenReturn(ofNullable(cart));
 
         // WHEN
-        ChartResponseDto result = chartService.getByUuid("mock-chart-uuid");
+        CartResponseDto result = cartService.getByUuid("mock-cart-uuid");
 
         // THEN
         assertEquals(100L, result.getPrice());
@@ -159,16 +166,16 @@ class ChartServiceImplTest {
     @Test
     void getByUuid_WhenItemIsNotFound_ShouldThrowDataNotFoundException() {
         // GIVEN
-        when(chartRepository.findById(anyString())).thenReturn(Optional.empty());
+        when(cartRepository.findById(anyString())).thenReturn(Optional.empty());
 
         // WHEN
-        assertThrows(DataNotFoundException.class, () -> chartService.getByUuid("mock-chart-uuid"));
+        assertThrows(DataNotFoundException.class, () -> cartService.getByUuid("mock-cart-uuid"));
     }
 
     @Test
     void updateStatus_WhenItemIsFound_ShouldReturnItem() {
         // GIVEN
-        Chart chart = Chart
+        Cart cart = Cart
                 .builder()
                 .marketUuid("mock-market-uuid")
                 .items(Set.of(Item.builder()
@@ -179,11 +186,12 @@ class ChartServiceImplTest {
                 .price(100L)
                 .build();
 
-        when(chartRepository.findById(anyString())).thenReturn(ofNullable(chart));
-        when(chartRepository.save(any())).thenReturn(chart);
+        when(cartRepository.findById(anyString())).thenReturn(ofNullable(cart));
+        when(cartRepository.save(any())).thenReturn(cart);
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
-        ChartResponseDto result = chartService.updateStatus("mock-chart-uuid", Status.PAYED);
+        CartResponseDto result = cartService.updateStatus("mock-cart-uuid", Status.PAYED);
 
         // THEN
         assertEquals(100L, result.getPrice());
@@ -192,7 +200,7 @@ class ChartServiceImplTest {
     @Test
     void deleteByUuid_WhenItemIsFound_ShouldReturnItem() {
         // GIVEN
-        Chart chart = Chart
+        Cart cart = Cart
                 .builder()
                 .marketUuid("mock-market-uuid")
                 .items(Set.of(Item.builder()
@@ -203,27 +211,28 @@ class ChartServiceImplTest {
                 .price(100L)
                 .build();
 
-        when(chartRepository.findById(anyString())).thenReturn(ofNullable(chart));
-        doNothing().when(chartRepository).deleteById(any());
+        when(cartRepository.findById(anyString())).thenReturn(ofNullable(cart));
+        doNothing().when(cartRepository).deleteById(any());
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
-        chartService.deleteByUuid("mock-chart-uuid");
+        cartService.deleteByUuid("mock-cart-uuid");
 
         // THEN
-        verify(chartRepository, times(1)).deleteById(anyString());
+        verify(cartRepository, times(1)).deleteById(anyString());
     }
 
     @Test
-    void findChartByFilter_WhenItemIsFound_ShouldReturnItem() {
+    void findCartByFilter_WhenItemIsFound_ShouldReturnItem() {
         // GIVEN
-        FilterChartRequestDto filter = FilterChartRequestDto.builder()
+        FilterCartRequestDto filter = FilterCartRequestDto.builder()
                 .marketUuid("market-uuid")
                 .status(Status.PAYED)
                 .page(1)
                 .size(10)
                 .build();
 
-        Chart chart = Chart
+        Cart cart = Cart
                 .builder()
                 .marketUuid("mock-market-uuid")
                 .items(Set.of(Item.builder()
@@ -235,10 +244,10 @@ class ChartServiceImplTest {
                 .build();
 
         when(mongoTemplate.count(any(), anyString())).thenReturn(1L);
-        when(mongoTemplate.find(any(), any())).thenReturn(List.of(chart));
+        when(mongoTemplate.find(any(), any())).thenReturn(List.of(cart));
 
         // WHEN
-        Page<ChartResponseDto> result = chartService.findChartByFilter(filter);
+        Page<CartResponseDto> result = cartService.findCartByFilter(filter);
 
         // THEN
         assertEquals(1, result.getPage());

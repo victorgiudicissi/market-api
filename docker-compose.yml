@@ -37,3 +37,6 @@ services:
       - 8080:8080
     environment:
       - SPRING_DATA_MONGODB_.HOST=mongo-db
+      - kafka.host=kafka
+      - kafka.port=9092
+      - kafka.topic=market-api-topic

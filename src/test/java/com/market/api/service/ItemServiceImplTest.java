@@ -6,6 +6,8 @@ import com.market.api.exception.DataNotFoundException;
 import com.market.api.model.Item;
 import com.market.api.repository.ItemRepository;
 import com.market.api.service.impl.ItemServiceImpl;
+import com.market.api.service.impl.KafkaServiceImpl;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -31,6 +33,9 @@ public class ItemServiceImplTest {
     @Mock
     private MongoTemplate mongoTemplate;
 
+    @Mock
+    private KafkaServiceImpl kafkaService;
+
     @InjectMocks
     private ItemServiceImpl itemService;
 
@@ -40,7 +45,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void save_WhenItemsAreAvailableAndInStock_ShouldReturnChartResponseDto() {
+    void save_WhenItemsAreAvailableAndInStock_ShouldReturnCartResponseDto() {
         // GIVEN
         ItemRequestDto itemRequestDto = ItemRequestDto
                 .builder()
@@ -52,6 +57,7 @@ public class ItemServiceImplTest {
                 .build();
 
         when(itemRepository.save(any())).thenReturn(itemRequestDto.toItem());
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
         ItemResponseDto result = itemService.save(itemRequestDto);
@@ -76,6 +82,7 @@ public class ItemServiceImplTest {
 
         when(itemRepository.findById(any())).thenReturn(Optional.of(itemRequestDto.toItem()));
         when(itemRepository.save(any())).thenReturn(itemRequestDto.toItem());
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
         ItemResponseDto result = itemService.updateItem("mock-uuid", itemRequestDto);
@@ -101,6 +108,7 @@ public class ItemServiceImplTest {
 
         when(itemRepository.findById(any())).thenReturn(Optional.empty());
         when(itemRepository.save(any())).thenReturn(itemRequestDto.toItem());
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN - THEN
         assertThrows(DataNotFoundException.class, () -> itemService.updateItem("mock-uuid", itemRequestDto));
@@ -178,6 +186,7 @@ public class ItemServiceImplTest {
 
         when(itemRepository.findById(any())).thenReturn(Optional.of(itemRequestDto.toItem()));
         doNothing().when(itemRepository).delete(any());
+        doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
         itemService.delete("mock-uuid");
