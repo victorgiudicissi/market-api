@@ -6,12 +6,12 @@ import com.market.api.dto.cart.CartResponseDto;
 import com.market.api.dto.item.FilterCartRequestDto;
 import com.market.api.model.enums.Status;
 import com.market.api.service.CartService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/cart")

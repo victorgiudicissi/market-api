@@ -4,6 +4,9 @@ spring:
       host: localhost
       port: 27017
       database: market_db
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 kafka:
   host: localhost
