@@ -4,17 +4,17 @@ import com.market.api.dto.Page;
 import com.market.api.dto.item.FilterItemRequestDto;
 import com.market.api.dto.item.ItemRequestDto;
 import com.market.api.dto.item.ItemResponseDto;
-import com.market.api.model.Item;
+import com.market.api.entity.Item;
 
 import java.util.List;
 import java.util.Set;
 
 public interface ItemService {
-    ItemResponseDto save(ItemRequestDto itemRequestDto);
-    ItemResponseDto updateItem(String itemUuid, ItemRequestDto itemRequestDto);
+    Item save(Item data);
+    Item updateItem(String itemUuid, Item data);
     void delete(String itemUuid);
-    ItemResponseDto findItemByUuid(String itemUuid);
-    Page<ItemResponseDto> findItemsByFilter(FilterItemRequestDto filter);
+    Item findItemByUuid(String itemUuid);
+    List<Item> findItemsByFilter(FilterItemRequestDto filter);
     List<Item> saveAll(Set<Item> items);
-    ItemResponseDto changeItemStatus(String itemUuid, boolean status);
+    Item changeItemStatus(String itemUuid, boolean status);
 }

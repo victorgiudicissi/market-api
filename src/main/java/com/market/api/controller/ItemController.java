@@ -5,11 +5,15 @@ import com.market.api.dto.item.FilterItemRequestDto;
 import com.market.api.dto.item.ItemRequestDto;
 import com.market.api.dto.item.ItemResponseDto;
 import com.market.api.service.ItemService;
+import com.market.api.entity.Item;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -19,14 +23,16 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ResponseEntity<ItemResponseDto> createItem(@Valid @RequestBody ItemRequestDto itemRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.save(itemRequestDto));
+    public ResponseEntity<ItemResponseDto> createItem(@Valid @RequestBody ItemRequestDto data) {
+        Item result = itemService.save(data.toItem());
+        return ResponseEntity.status(HttpStatus.CREATED).body(result.toItemResponseDto());
     }
 
     @PutMapping(value = "/{itemUuid}")
-    public ResponseEntity<ItemResponseDto> updateItem(@Valid @RequestBody ItemRequestDto itemRequestDto,
+    public ResponseEntity<ItemResponseDto> updateItem(@Valid @RequestBody Item data,
                                                       @PathVariable("itemUuid") String uuid) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.updateItem(uuid, itemRequestDto));
+        Item result = itemService.updateItem(uuid, data);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result.toItemResponseDto());
     }
 
     @DeleteMapping(value = "/{itemUuid}")
@@ -37,17 +43,28 @@ public class ItemController {
 
     @GetMapping(value = "/{itemUuid}")
     public ResponseEntity<ItemResponseDto> findItem(@PathVariable("itemUuid") String uuid) {
-        return ResponseEntity.ok(itemService.findItemByUuid(uuid));
+        return ResponseEntity.ok(itemService.findItemByUuid(uuid).toItemResponseDto());
     }
 
     @GetMapping
     public ResponseEntity<Page<ItemResponseDto>> findItems(@Valid FilterItemRequestDto filter) {
-        return ResponseEntity.ok(itemService.findItemsByFilter(filter));
+        List<Item> result = itemService.findItemsByFilter(filter);
+
+        List<ItemResponseDto> itemsDTO = result.stream()
+                .map(Item::toItemResponseDto)
+                .collect(Collectors.toList());
+
+        Page<ItemResponseDto> pagination = new Page<>();
+        pagination.setPage(filter.getPage());
+        pagination.setSize(filter.getSize());
+        pagination.setContent(itemsDTO);
+
+        return ResponseEntity.ok(pagination);
     }
 
     @PatchMapping("/{itemUuid}/status/{isEnabled}")
     public ResponseEntity<ItemResponseDto> enableOrDisableItem(@PathVariable("itemUuid") String itemUuid,
                                                                @PathVariable("isEnabled") boolean isEnabled) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.changeItemStatus(itemUuid, isEnabled));
+        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.changeItemStatus(itemUuid, isEnabled).toItemResponseDto());
     }
 }

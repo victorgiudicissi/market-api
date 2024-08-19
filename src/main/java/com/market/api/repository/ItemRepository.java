@@ -1,6 +1,6 @@
 package com.market.api.repository;
 
-import com.market.api.model.Item;
+import com.market.api.entity.Item;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

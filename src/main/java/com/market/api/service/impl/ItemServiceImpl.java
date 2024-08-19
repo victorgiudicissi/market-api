@@ -1,14 +1,11 @@
 package com.market.api.service.impl;
 
-import com.market.api.dto.Page;
 import com.market.api.dto.event.Event;
 import com.market.api.dto.event.EventAction;
 import com.market.api.dto.event.EventType;
 import com.market.api.dto.item.FilterItemRequestDto;
-import com.market.api.dto.item.ItemRequestDto;
-import com.market.api.dto.item.ItemResponseDto;
 import com.market.api.exception.DataNotFoundException;
-import com.market.api.model.Item;
+import com.market.api.entity.Item;
 import com.market.api.repository.ItemRepository;
 import com.market.api.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,9 +31,8 @@ public class ItemServiceImpl implements ItemService {
     private final KafkaServiceImpl kafkaService;
 
     @Override
-    public ItemResponseDto save(ItemRequestDto itemRequestDto) {
-        ItemResponseDto result = itemRepository.save(itemRequestDto.toItem())
-                .toItemResponseDto();
+    public Item save(Item data) {
+        Item result = itemRepository.save(data);
 
         kafkaService.sendEvent(Event
                         .builder()
@@ -52,11 +47,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemResponseDto updateItem(String itemUuid, ItemRequestDto itemRequestDto) {
-        Item item = this.findItem(itemUuid);
+    public Item updateItem(String itemUuid, Item data) {
+        this.findItem(itemUuid);
 
-        ItemResponseDto result = itemRepository.save(itemRequestDto.toItem(itemUuid, item.getCreatedAt()))
-                .toItemResponseDto();
+        data.setUuid(itemUuid);
+
+        Item result = itemRepository.save(data);
 
         kafkaService.sendEvent(Event
                 .builder()
@@ -75,13 +71,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemResponseDto changeItemStatus(String itemUuid, boolean status) {
+    public Item changeItemStatus(String itemUuid, boolean status) {
         Item item = this.findItem(itemUuid);
 
         item.setEnabled(status);
 
-        ItemResponseDto result = itemRepository.save(item)
-                .toItemResponseDto();
+        Item result = itemRepository.save(item);
 
         kafkaService.sendEvent(Event
                 .builder()
@@ -98,8 +93,6 @@ public class ItemServiceImpl implements ItemService {
     public void delete(String itemUuid) {
         Item item = this.findItem(itemUuid);
 
-        log.info("Item encontrado com sucesso, iniciando a deleção. item: {}", item);
-
         kafkaService.sendEvent(Event
                 .builder()
                 .content(item.toItemResponseDto())
@@ -112,16 +105,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemResponseDto findItemByUuid(String itemUuid) {
-        Item item = this.findItem(itemUuid);
-
-        log.info("Item encontrado com sucesso. item: {}", item);
-        return item.toItemResponseDto();
+    public Item findItemByUuid(String itemUuid) {
+        return this.findItem(itemUuid);
     }
 
     @Override
-    public Page<ItemResponseDto> findItemsByFilter(FilterItemRequestDto filter) {
-        log.info("Filtering items. filter: {}", filter);
+    public List<Item> findItemsByFilter(FilterItemRequestDto filter) {
         PageRequest pageRequest = PageRequest.of(filter.getPage() - 1, filter.getSize());
 
         Query query = new Query();
@@ -134,23 +123,9 @@ public class ItemServiceImpl implements ItemService {
             query.addCriteria(Criteria.where("marketUuid").regex(filter.getMarketUuid(), "i"));
         }
 
-        long totalCount = mongoTemplate.count(query, Item.class);
-
         query.with(pageRequest);
 
-        List<Item> items = mongoTemplate.find(query, Item.class);
-
-        List<ItemResponseDto> itemsDTO = items.stream()
-                .map(Item::toItemResponseDto)
-                .collect(Collectors.toList());
-
-        Page<ItemResponseDto> pagination = new Page<>();
-        pagination.setPage(filter.getPage());
-        pagination.setCount(totalCount);
-        pagination.setSize(filter.getSize());
-        pagination.setContent(itemsDTO);
-
-        return pagination;
+        return mongoTemplate.find(query, Item.class);
     }
 
     private Item findItem(String itemUuid) {

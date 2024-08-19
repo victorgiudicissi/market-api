@@ -10,7 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Page<T> {
-    long count;
     int size;
     int page;
     List<T> content;

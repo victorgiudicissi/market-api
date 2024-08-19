@@ -1,4 +1,4 @@
-package com.market.api.model;
+package com.market.api.entity;
 
 import com.market.api.dto.item.ItemResponseDto;
 import lombok.*;

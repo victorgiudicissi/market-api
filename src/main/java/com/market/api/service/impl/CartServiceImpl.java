@@ -1,18 +1,15 @@
 package com.market.api.service.impl;
 
-import com.market.api.dto.Page;
-import com.market.api.dto.cart.CartRequestDto;
 import com.market.api.dto.cart.CartResponseDto;
 import com.market.api.dto.event.Event;
 import com.market.api.dto.event.EventAction;
 import com.market.api.dto.event.EventType;
 import com.market.api.dto.item.FilterCartRequestDto;
-import com.market.api.dto.item.ItemResponseDto;
+import com.market.api.entity.Cart;
 import com.market.api.exception.DataNotFoundException;
 import com.market.api.exception.OutOfStockException;
 import com.market.api.exception.UnavailableProductException;
-import com.market.api.model.Cart;
-import com.market.api.model.Item;
+import com.market.api.entity.Item;
 import com.market.api.model.enums.Status;
 import com.market.api.repository.CartRepository;
 import com.market.api.service.CartService;
@@ -28,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,7 +37,7 @@ public class CartServiceImpl implements CartService {
     private final KafkaServiceImpl kafkaService;
 
     @Override
-    public CartResponseDto createCart(CartRequestDto cartRequestDto) {
+    public Cart createCart(Cart cartRequestDto) {
         Cart cart = new Cart();
 
         AtomicReference<Long> cartPrice = new AtomicReference<>(0L);
@@ -51,9 +47,7 @@ public class CartServiceImpl implements CartService {
 
         cartRequestDto.getItems()
         .forEach(itemFromRequest -> {
-            ItemResponseDto itemFound = itemService.findItemByUuid(itemFromRequest.getUuid());
-
-            log.info(String.format("Item found. item: %s", itemFound));
+            Item itemFound = itemService.findItemByUuid(itemFromRequest.getUuid());
 
             if (itemFound.getQuantity().compareTo(itemFromRequest.getQuantity()) < 0) {
                 throw new OutOfStockException(String.format("The quantity informed for item %s is greater than the stock %s.", itemFromRequest.getUuid(), itemFound.getQuantity()));
@@ -63,14 +57,14 @@ public class CartServiceImpl implements CartService {
                 throw new UnavailableProductException(String.format("The product %s is disabled.", itemFound.getDescription()));
             }
 
-            ItemResponseDto cartItem = itemFound.toBuilder().quantity(itemFromRequest.getQuantity()).build();
+            Item cartItem = itemFound.toBuilder().quantity(itemFromRequest.getQuantity()).build();
 
-            ItemResponseDto updatedItem = itemFound.toBuilder().quantity(itemFound.getQuantity() - itemFromRequest.getQuantity()).build();
+            Item updatedItem = itemFound.toBuilder().quantity(itemFound.getQuantity() - itemFromRequest.getQuantity()).build();
 
             cartPrice.set(itemFound.getPrice() * itemFromRequest.getQuantity());
 
-            updatedItems.add(updatedItem.toItem());
-            cartItems.add(cartItem.toItem());
+            updatedItems.add(updatedItem);
+            cartItems.add(cartItem);
         });
 
         cart.setUuid(UUID.randomUUID().toString());
@@ -84,26 +78,24 @@ public class CartServiceImpl implements CartService {
         cartRepository.save(cart);
         itemService.saveAll(updatedItems);
 
-        CartResponseDto result = cart.toCartResponseDto();
-
         kafkaService.sendEvent(Event
                         .builder()
-                        .content(result)
+                        .content(cart)
                         .action(com.market.api.dto.event.EventAction.SAVE)
                         .type(EventType.CART)
                         .createdAt(LocalDateTime.now())
                         .build(),
                 EventType.CART);
 
-        return result;
+        return cart;
     }
 
-    public CartResponseDto getByUuid(String uuid) {
-        return this.findById(uuid).toCartResponseDto();
+    public Cart getByUuid(String uuid) {
+        return this.findById(uuid);
     }
 
     @Override
-    public Page<CartResponseDto> findCartByFilter(FilterCartRequestDto filter) {
+    public List<Cart> findCartByFilter(FilterCartRequestDto filter) {
         log.info("Filtering carts. filter: {}", filter);
         PageRequest pageRequest = PageRequest.of(filter.getPage() - 1, filter.getSize());
 
@@ -115,23 +107,9 @@ public class CartServiceImpl implements CartService {
             query.addCriteria(Criteria.where("status").regex(filter.getStatus().toString(), "i"));
         }
 
-        long totalCount = mongoTemplate.count(query, Cart.class);
-
         query.with(pageRequest);
 
-        List<Cart> cart = mongoTemplate.find(query, Cart.class);
-
-        List<CartResponseDto> itemsDTO = cart.stream()
-                .map(Cart::toCartResponseDto)
-                .collect(Collectors.toList());
-
-        Page<CartResponseDto> pagination = new Page<>();
-        pagination.setPage(filter.getPage());
-        pagination.setCount(totalCount);
-        pagination.setSize(filter.getSize());
-        pagination.setContent(itemsDTO);
-
-        return pagination;
+        return mongoTemplate.find(query, Cart.class);
     }
 
     public void deleteByUuid(String uuid) {
@@ -150,7 +128,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartResponseDto updateStatus(String uuid, Status status) {
+    public Cart updateStatus(String uuid, Status status) {
         Cart cart = findById(uuid);
 
         cart.setStatus(status);
@@ -164,7 +142,7 @@ public class CartServiceImpl implements CartService {
                         .build(),
                 EventType.CART);
 
-        return cartRepository.save(cart).toCartResponseDto();
+        return cartRepository.save(cart);
     }
 
     private Cart findById(String uuid) {

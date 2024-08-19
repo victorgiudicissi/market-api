@@ -1,6 +1,6 @@
 package com.market.api.dto.item;
 
-import com.market.api.model.Item;
+import com.market.api.entity.Item;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

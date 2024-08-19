@@ -1,5 +1,6 @@
 package com.market.api.dto.item;
 
+import com.market.api.entity.Item;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -18,4 +19,11 @@ public class CartItemRequestDto {
     @Positive(message = "Must be greater than 0")
     @NotNull(message = "Quantity may not be null")
     private Long quantity;
+
+    public Item toItem() {
+        return Item.builder()
+                .uuid(this.uuid)
+                .quantity(this.quantity)
+                .build();
+    }
 }

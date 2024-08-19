@@ -1,13 +1,11 @@
 package com.market.api.service;
 
-import com.market.api.dto.Page;
 import com.market.api.dto.item.*;
 import com.market.api.exception.DataNotFoundException;
-import com.market.api.model.Item;
+import com.market.api.entity.Item;
 import com.market.api.repository.ItemRepository;
 import com.market.api.service.impl.ItemServiceImpl;
 import com.market.api.service.impl.KafkaServiceImpl;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -47,7 +45,7 @@ public class ItemServiceImplTest {
     @Test
     void save_WhenItemsAreAvailableAndInStock_ShouldReturnCartResponseDto() {
         // GIVEN
-        ItemRequestDto itemRequestDto = ItemRequestDto
+        Item data = Item
                 .builder()
                 .marketUuid("mock-market-uuid")
                 .description("Mock item")
@@ -56,11 +54,11 @@ public class ItemServiceImplTest {
                 .price(110L)
                 .build();
 
-        when(itemRepository.save(any())).thenReturn(itemRequestDto.toItem());
+        when(itemRepository.save(any())).thenReturn(data);
         doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
-        ItemResponseDto result = itemService.save(itemRequestDto);
+        Item result = itemService.save(data);
 
         // THEN
         assertNotNull(result);
@@ -71,7 +69,7 @@ public class ItemServiceImplTest {
     @Test
     void updateItem_WhenItemExists_ShouldUpdateItem() {
         // GIVEN
-        ItemRequestDto itemRequestDto = ItemRequestDto
+        Item data = Item
                 .builder()
                 .marketUuid("mock-market-uuid")
                 .description("Mock item")
@@ -80,12 +78,12 @@ public class ItemServiceImplTest {
                 .price(110L)
                 .build();
 
-        when(itemRepository.findById(any())).thenReturn(Optional.of(itemRequestDto.toItem()));
-        when(itemRepository.save(any())).thenReturn(itemRequestDto.toItem());
+        when(itemRepository.findById(any())).thenReturn(Optional.of(data));
+        when(itemRepository.save(any())).thenReturn(data);
         doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
-        ItemResponseDto result = itemService.updateItem("mock-uuid", itemRequestDto);
+        Item result = itemService.updateItem("mock-uuid", data);
 
         // THEN
         assertNotNull(result);
@@ -97,7 +95,7 @@ public class ItemServiceImplTest {
     @Test
     void updateItem_WhenItemDoesNotExists_ShouldThrowDataNotFoundException() {
         // GIVEN
-        ItemRequestDto itemRequestDto = ItemRequestDto
+        Item data = Item
                 .builder()
                 .marketUuid("mock-market-uuid")
                 .description("Mock item")
@@ -107,11 +105,11 @@ public class ItemServiceImplTest {
                 .build();
 
         when(itemRepository.findById(any())).thenReturn(Optional.empty());
-        when(itemRepository.save(any())).thenReturn(itemRequestDto.toItem());
+        when(itemRepository.save(any())).thenReturn(data);
         doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN - THEN
-        assertThrows(DataNotFoundException.class, () -> itemService.updateItem("mock-uuid", itemRequestDto));
+        assertThrows(DataNotFoundException.class, () -> itemService.updateItem("mock-uuid", data));
 
         verify(itemRepository, times(1)).findById(any());
         verify(itemRepository, times(0)).save(any());
@@ -133,7 +131,7 @@ public class ItemServiceImplTest {
         when(itemRepository.findById(any())).thenReturn(Optional.of(itemRequestDto.toItem()));
 
         // WHEN
-        ItemResponseDto result = itemService.findItemByUuid("mock-uuid");
+        Item result = itemService.findItemByUuid("mock-uuid");
 
         // THEN
         assertNotNull(result);
@@ -164,12 +162,10 @@ public class ItemServiceImplTest {
         when(mongoTemplate.find(any(), any())).thenReturn(List.of(item));
 
         // WHEN
-        Page<ItemResponseDto> result = itemService.findItemsByFilter(filter);
+        List<Item> result = itemService.findItemsByFilter(filter);
 
         // THEN
-        assertEquals(1, result.getPage());
-        assertEquals(10, result.getSize());
-        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.size());
     }
 
     @Test

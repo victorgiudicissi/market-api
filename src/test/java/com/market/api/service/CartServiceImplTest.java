@@ -1,16 +1,11 @@
 package com.market.api.service;
 
-import com.market.api.dto.Page;
-import com.market.api.dto.cart.CartRequestDto;
-import com.market.api.dto.cart.CartResponseDto;
-import com.market.api.dto.item.CartItemRequestDto;
 import com.market.api.dto.item.FilterCartRequestDto;
-import com.market.api.dto.item.ItemResponseDto;
+import com.market.api.entity.Cart;
 import com.market.api.exception.DataNotFoundException;
 import com.market.api.exception.OutOfStockException;
 import com.market.api.exception.UnavailableProductException;
-import com.market.api.model.Cart;
-import com.market.api.model.Item;
+import com.market.api.entity.Item;
 import com.market.api.model.enums.Status;
 import com.market.api.repository.CartRepository;
 import com.market.api.service.impl.CartServiceImpl;
@@ -56,17 +51,17 @@ class CartServiceImplTest {
     @Test
     void createCart_WhenItemsAreAvailableAndInStock_ShouldReturnCartResponseDto() {
         // GIVEN
-        CartRequestDto cartRequestDto = CartRequestDto
+        Cart cartRequestDto = Cart
                 .builder()
                 .marketUuid("mock-market-uuid")
-                .items(List.of(CartItemRequestDto.builder()
+                .items(Set.of(Item.builder()
                         .uuid("first-item-uuid")
                         .quantity(10L)
                         .build())
                 )
                 .build();
 
-        when(itemService.findItemByUuid(any())).thenReturn(ItemResponseDto.builder()
+        when(itemService.findItemByUuid(any())).thenReturn(Item.builder()
                         .price(50L)
                         .quantity(100L)
                         .enabled(true)
@@ -75,7 +70,7 @@ class CartServiceImplTest {
         doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
-        CartResponseDto result = cartService.createCart(cartRequestDto);
+        Cart result = cartService.createCart(cartRequestDto);
 
         // THEN
         assertNotNull(result);
@@ -87,17 +82,17 @@ class CartServiceImplTest {
     @Test
     void createCart_WhenItemsAreNotInStock_ShouldThrowOutOfStockException() {
         // GIVEN
-        CartRequestDto cartRequestDto = CartRequestDto
+        Cart cartRequestDto = Cart
                 .builder()
                 .marketUuid("mock-market-uuid")
-                .items(List.of(CartItemRequestDto.builder()
+                .items(Set.of(Item.builder()
                         .uuid("first-item-uuid")
                         .quantity(11L)
                         .build())
                 )
                 .build();
 
-        when(itemService.findItemByUuid(any())).thenReturn(ItemResponseDto.builder()
+        when(itemService.findItemByUuid(any())).thenReturn(Item.builder()
                 .price(50L)
                 .quantity(10L)
                 .enabled(true)
@@ -115,17 +110,17 @@ class CartServiceImplTest {
     @Test
     void createCart_WhenItemsAreDisabled_ShouldThrowUnavailableProductException() {
         // GIVEN
-        CartRequestDto cartRequestDto = CartRequestDto
+        Cart cartRequestDto = Cart
                 .builder()
                 .marketUuid("mock-market-uuid")
-                .items(List.of(CartItemRequestDto.builder()
+                .items(Set.of(Item.builder()
                         .uuid("first-item-uuid")
                         .quantity(10L)
                         .build())
                 )
                 .build();
 
-        when(itemService.findItemByUuid(any())).thenReturn(ItemResponseDto.builder()
+        when(itemService.findItemByUuid(any())).thenReturn(Item.builder()
                 .price(50L)
                 .quantity(10L)
                 .enabled(false)
@@ -157,7 +152,7 @@ class CartServiceImplTest {
         when(cartRepository.findById(anyString())).thenReturn(ofNullable(cart));
 
         // WHEN
-        CartResponseDto result = cartService.getByUuid("mock-cart-uuid");
+        Cart result = cartService.getByUuid("mock-cart-uuid");
 
         // THEN
         assertEquals(100L, result.getPrice());
@@ -191,7 +186,7 @@ class CartServiceImplTest {
         doNothing().when(kafkaService).sendEvent(any(), any());
 
         // WHEN
-        CartResponseDto result = cartService.updateStatus("mock-cart-uuid", Status.PAYED);
+        Cart result = cartService.updateStatus("mock-cart-uuid", Status.PAYED);
 
         // THEN
         assertEquals(100L, result.getPrice());
@@ -229,7 +224,7 @@ class CartServiceImplTest {
                 .marketUuid("market-uuid")
                 .status(Status.PAYED)
                 .page(1)
-                .size(10)
+                .size(1)
                 .build();
 
         Cart cart = Cart
@@ -243,15 +238,12 @@ class CartServiceImplTest {
                 .price(100L)
                 .build();
 
-        when(mongoTemplate.count(any(), anyString())).thenReturn(1L);
         when(mongoTemplate.find(any(), any())).thenReturn(List.of(cart));
 
         // WHEN
-        Page<CartResponseDto> result = cartService.findCartByFilter(filter);
+        List<Cart> result = cartService.findCartByFilter(filter);
 
         // THEN
-        assertEquals(1, result.getPage());
-        assertEquals(10, result.getSize());
-        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.size());
     }
 }

@@ -1,4 +1,4 @@
-package com.market.api.model;
+package com.market.api.entity;
 
 import com.market.api.dto.cart.CartResponseDto;
 import com.market.api.model.enums.Status;
@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,7 +33,7 @@ public class Cart {
                 .marketUuid(this.marketUuid)
                 .price(this.price)
                 .status(this.status)
-                .items(this.items.stream().map(item -> item.toItemResponseDto()).collect(Collectors.toList()))
+                .items(this.items.stream().map(Item::toItemResponseDto).collect(Collectors.toList()))
                 .createdAt(this.createdAt)
                 .build();
     }
